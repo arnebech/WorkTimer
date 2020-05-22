@@ -4,7 +4,7 @@ CLI utility to track overall work time for people who use (macOS) work computer 
 
 When working from home without an alarm clock (other than young kids) the daily schedule varies. Between that and other breaks (to play with the kids) it is harder to keep track of the hours worked. 
 
-This simple utility tracks hours when the computer is awake, starting freshly each day, by tracking sleep/wake events.
+This simple utility tracks hours when the computer is awake, starting freshly each day, by tracking sleep/wake events. You leave it running at all times in a small terminal window.
 
 ### Sample Output
 
@@ -27,7 +27,13 @@ OPTIONS:
   -h, --help              Show help information.
 ```
 
-### Compiling
+### Where do I get it?
+
+#### Binaries
+
+Download from [release page](https://github.com/arnebech/WorkTimer/releases).
+
+#### Building from source
 
 ```sh
 swift build -c release
