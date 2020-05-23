@@ -80,7 +80,7 @@ public class WorkTimeTracker {
         return timeAdjustment;
     }
     
-    func getWorkTimeCompleted(now: Date) -> TimeInterval {
+    func getWorkTimeDone(at now: Date) -> TimeInterval {
         
         var workStart = Calendar.current.startOfDay(for: now)
         
@@ -96,7 +96,7 @@ public class WorkTimeTracker {
     }
     
     public func getWorkTimeDone() -> TimeInterval {
-        return getWorkTimeCompleted(now: Date())
+        return getWorkTimeDone(at: Date())
     }
     
     public func getWorkTimeLeft() -> TimeInterval {
