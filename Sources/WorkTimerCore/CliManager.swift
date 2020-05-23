@@ -10,7 +10,7 @@ public class WorkTimeCli {
     var timer: Timer?
     let terminal: TerminalController
     
-    public init(manager: WorkTimeTracker, terminal: TerminalController) {
+    public init(manager: WorkTimeTracker, terminal: TerminalController, statusUpdateEvery statusTimeInterval: TimeInterval) {
         self.manager = manager
         self.terminal = terminal
         
@@ -27,6 +27,8 @@ public class WorkTimeCli {
         shortDurationFormatter.allowedUnits = [.minute, .hour]
         
         manager.onEventCallback = self.onAddInternalEntry
+        
+        self.scheduleRecurringStatusUpdates(timerInterval: statusTimeInterval)
         
     }
     
@@ -55,7 +57,7 @@ public class WorkTimeCli {
         terminal.write("Worked: \(terminal.wrap(duration, inColor: .cyan)) Done: \(terminal.wrap(estWorkEnd, inColor: .cyan))\n")
     }
     
-    public func scheduleRecurringStatusUpdates(timerInterval: TimeInterval) {
+    func scheduleRecurringStatusUpdates(timerInterval: TimeInterval) {
         let timer = Timer.scheduledTimer(withTimeInterval: timerInterval, repeats: true) { (timer) in
             if self.outputEnabled {
                 self.printCurrentStatus()
@@ -72,29 +74,33 @@ public class WorkTimeCli {
             if val == "?" {
                 printOptions()
             } else {
-                print("Unrecognized option. Use ? + enter to view commands.")
+                writeLine("Unrecognized option. Use ? + enter to view commands.")
             }
             outputEnabled = true
         }
     }
     
+    func writeLine(_ line: String) {
+        terminal.write("\(line)\n")
+    }
+    
     func printOptions() {
-        print("Options: ")
-        print(" 1. Add/Remove time")
-        print(" 2. List todays events")
-        print("Enter Option: ", terminator: "")
+        writeLine("Options: ")
+        writeLine(" 1. Add/Remove time")
+        writeLine(" 2. List todays events")
+        terminal.write("Enter Option: ")
         let val = readLine()
         if val == "1" {
             handleAdjustTime()
         } else if val == "2" {
             printHistoryEvents()
         } else {
-            print("Invalid option")
+            writeLine("Invalid option")
         }
     }
     
     func handleAdjustTime() {
-        print("Enter time adjustment such as 00:10 or -01:10: ", terminator: "")
+        terminal.write("Enter time adjustment such as 00:10 or -01:10: ")
         let val = readLine()
         
         if let val = val {
@@ -107,14 +113,14 @@ public class WorkTimeCli {
             let hours = numbers.count == 1 ? 0 : numbers[0];
             let duration = factor * (hours * 60 * 60 + minutes * 60);
             manager.adjustTime(time: duration)
-            print("Adjusted time by \(shortDurationFormatter.string(from: duration) ?? "?")s at \(shortDateFormatter.string(from: Date()))")
+            writeLine("Adjusted time by \(shortDurationFormatter.string(from: duration) ?? "?")s at \(shortDateFormatter.string(from: Date()))")
             printCurrentStatus()
         }
     }
     
     func printHistoryEvents() {
         manager.events.forEach { (item) in
-            print("\(item.type) - \(shortDateFormatter.string(from: item.time))")
+            writeLine("\(item.type) - \(shortDateFormatter.string(from: item.time))")
         }
     }
 }
