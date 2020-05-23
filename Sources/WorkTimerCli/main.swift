@@ -7,7 +7,7 @@ import WorkTimerCore
 struct WorkTimer: ParsableCommand {
     static var configuration = CommandConfiguration(
         abstract: "An utility for tracking time worked on a work computer.",
-        version: "0.0.1"
+        version: "0.0.2"
     )
     
     @Option(default: 8, help: "Number of hours in a workday")
