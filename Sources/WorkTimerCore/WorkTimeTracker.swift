@@ -53,10 +53,6 @@ public class WorkTimeTracker {
         events.append(Event(type: type, time: now, timeAdjust: time))
     }
     
-    public func calculateTodaysWorkTime() -> TimeInterval {
-        return calculateTodaysWorkTimeFor(now: Date())
-    }
-    
     func getTimeAdjustmentFrom(events: [Event]) -> TimeInterval {
         var isAsleep = false
         var nextCheck: EventType?
@@ -84,8 +80,7 @@ public class WorkTimeTracker {
         return timeAdjustment;
     }
     
-    
-    public func calculateTodaysWorkTimeFor(now: Date) -> TimeInterval {
+    func getWorkTimeCompleted(now: Date) -> TimeInterval {
         
         var workStart = Calendar.current.startOfDay(for: now)
         
@@ -100,13 +95,19 @@ public class WorkTimeTracker {
         return now.timeIntervalSince(workStart) + getTimeAdjustmentFrom(events: events)
     }
     
-    public func calculateEstimatedDoneTime() -> Date {
-        let todaysWorkTime = calculateTodaysWorkTime()
+    public func getWorkTimeDone() -> TimeInterval {
+        return getWorkTimeCompleted(now: Date())
+    }
+    
+    public func getWorkTimeLeft() -> TimeInterval {
+        let todaysWorkTime = getWorkTimeDone()
         let workTimeLeft = dailyWorkSeconds - todaysWorkTime;
-        
+        return workTimeLeft
+    }
+    
+    public func getEstimatedDoneTime() -> Date {        
         let now = Date()
-        
-        let endTime = now.addingTimeInterval(workTimeLeft)
+        let endTime = now.addingTimeInterval(getWorkTimeLeft())
         return endTime
     }
 }

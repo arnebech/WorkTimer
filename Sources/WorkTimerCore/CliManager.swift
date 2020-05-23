@@ -7,12 +7,16 @@ public class WorkTimeCli {
     let shortDateFormatter: DateFormatter
     let endTimeFormatter: DateFormatter
     let shortDurationFormatter: DateComponentsFormatter
-    var timer: Timer?
+    var statusTimer = Timer()
+    var endTimer: Timer?
     let terminal: TerminalController
+    var dayFinished = false
+    let statusTimeInterval: TimeInterval
     
     public init(manager: WorkTimeTracker, terminal: TerminalController, statusUpdateEvery statusTimeInterval: TimeInterval) {
         self.manager = manager
         self.terminal = terminal
+        self.statusTimeInterval = statusTimeInterval
         
         endTimeFormatter = DateFormatter()
         endTimeFormatter.dateStyle = .none
@@ -26,9 +30,9 @@ public class WorkTimeCli {
         shortDurationFormatter.unitsStyle = .short
         shortDurationFormatter.allowedUnits = [.minute, .hour]
         
-        manager.onEventCallback = self.onAddInternalEntry
+        manager.onEventCallback = onAddInternalEntry
         
-        self.scheduleRecurringStatusUpdates(timerInterval: statusTimeInterval)
+        scheduleRecurringStatusUpdates(timerInterval: statusTimeInterval)
         
     }
     
@@ -47,14 +51,48 @@ public class WorkTimeCli {
         }
     }
     
+    func printWorkFinishedMessage() {
+        let formattedTimeDone = shortDurationFormatter.string(from: manager.getWorkTimeDone()) ?? ""
+        writeLine("🎉🎉🎉🎉🎉🎉🎉🎉🎉")
+        writeLine("Worked: \(terminal.wrap(formattedTimeDone, inColor: .cyan))")
+        writeLine("🎉🎉🎉🎉🎉🎉🎉🎉🎉")
+    }
+    
+    func handleWorkTimeFinish() {
+        let timeLeft = manager.getWorkTimeLeft();
+        
+        endTimer?.invalidate()
+        
+        if timeLeft > 0 {
+            dayFinished = false
+            if timeLeft < statusTimeInterval {
+                endTimer = Timer.scheduledTimer(withTimeInterval: timeLeft, repeats: false) { (timer) in
+                    self.handleWorkTimeFinish()
+                }
+            }
+            return
+        }
+        
+        if dayFinished {
+            return
+        }
+        
+        if timeLeft <= 0 && !dayFinished {
+            dayFinished = true
+            printWorkFinishedMessage()
+        }
+    }
+    
     func printCurrentStatus() {
-        let timeInterval = self.manager.calculateTodaysWorkTime()
+        let timeDone = manager.getWorkTimeDone()
         
-        var duration = shortDurationFormatter.string(from: timeInterval) ?? ""
+        var duration = shortDurationFormatter.string(from: timeDone) ?? ""
         duration = duration.padding(toLength: 16, withPad: " ", startingAt: 0)
-        
-        let estWorkEnd = self.endTimeFormatter.string(from: self.manager.calculateEstimatedDoneTime())
-        terminal.write("Worked: \(terminal.wrap(duration, inColor: .cyan)) Done: \(terminal.wrap(estWorkEnd, inColor: .cyan))\n")
+    
+        let workEndDate = manager.getEstimatedDoneTime()
+        let workEndDateFormatted = endTimeFormatter.string(from: workEndDate)
+        let doneColor: TerminalController.Color = workEndDate < Date() ? .yellow : .cyan
+        terminal.write("Worked: \(terminal.wrap(duration, inColor: .cyan)) Done: \(terminal.wrap(workEndDateFormatted, inColor: doneColor))\n")
     }
     
     func scheduleRecurringStatusUpdates(timerInterval: TimeInterval) {
@@ -62,9 +100,10 @@ public class WorkTimeCli {
             if self.outputEnabled {
                 self.printCurrentStatus()
             }
+            self.handleWorkTimeFinish()
         }
         timer.fire()
-        self.timer = timer
+        statusTimer = timer
     }
     
     public func processInput() {

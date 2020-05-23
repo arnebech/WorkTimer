@@ -17,14 +17,14 @@ final class WorkTimerTests: XCTestCase {
     func testStartInMiddleOfDay() {
         
         XCTAssertEqual(
-            manager.calculateTodaysWorkTimeFor(now: date("2020-01-10 11:20")),
+            manager.getWorkTimeDone(now: date("2020-01-10 11:20")),
             3600)
     }
     
     func testTimeAdjustment() {
         manager.adjustTime(time: -250)
         XCTAssertEqual(
-            manager.calculateTodaysWorkTimeFor(now: date("2020-01-10 11:20")),
+            manager.getWorkTimeDone(now: date("2020-01-10 11:20")),
             3600 - 250)
     }
     
@@ -36,13 +36,13 @@ final class WorkTimerTests: XCTestCase {
                                  time: date("2020-01-10 10:50"))
         
         XCTAssertEqual(
-            manager.calculateTodaysWorkTimeFor(now: date("2020-01-10 11:20")),
+            manager.getWorkTimeDone(now: date("2020-01-10 11:20")),
             3000)
     }
     
     func testCrossDayBoundary() {
         XCTAssertEqual(
-            manager.calculateTodaysWorkTimeFor(now: date("2020-01-11 01:00")),
+            manager.getWorkTimeDone(now: date("2020-01-11 01:00")),
             3600)
     }
     
@@ -54,7 +54,7 @@ final class WorkTimerTests: XCTestCase {
                                  time: date("2020-01-11 10:50"))
         
         XCTAssertEqual(
-            manager.calculateTodaysWorkTimeFor(now: date("2020-01-11 11:00")),
+            manager.getWorkTimeDone(now: date("2020-01-11 11:00")),
             600)
     }
 }
