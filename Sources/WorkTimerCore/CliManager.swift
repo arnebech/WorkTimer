@@ -52,6 +52,9 @@ public class WorkTimeCli {
     }
     
     func printWorkFinishedMessage() {
+        if !outputEnabled {
+            return
+        }
         let formattedTimeDone = shortDurationFormatter.string(from: manager.getWorkTimeDone()) ?? ""
         writeLine("🎉🎉🎉🎉🎉🎉🎉🎉🎉")
         writeLine("Worked: \(terminal.wrap(formattedTimeDone, inColor: .cyan))")
